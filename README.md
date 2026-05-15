@@ -50,6 +50,12 @@ A desktop search and preview tool for your local ComfyUI workflow library — pl
 python -m pip install anthropic
 ```
 
+> **Important — multiple Python versions:** If you have more than one Python installed, make sure you install `anthropic` using the same Python that runs the app. If the AI features say the package isn't found even after installing it, use this instead:
+> ```powershell
+> & "$(python -c 'import sys; print(sys.executable)')" -m pip install anthropic
+> ```
+> That installs into whichever Python is actually running your scripts.
+
 ---
 
 ## Installation
