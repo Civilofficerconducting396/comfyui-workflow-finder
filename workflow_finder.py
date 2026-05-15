@@ -744,8 +744,74 @@ class WorkflowFinder(tk.Tk):
         enabled = [e["path"] for e in self.dir_entries if e["enabled"]]
         if enabled:
             self.after(200, self._start_scan)
+        else:
+            # No enabled locations — likely a first run, show welcome
+            self.after(400, self._show_welcome)
 
     # ── Config persistence ───────────────────────────────────────────────
+
+    def _show_welcome(self):
+        """First-run welcome dialog explaining how to get started."""
+        win = tk.Toplevel(self)
+        win.title("Welcome to ComfyUI Workflow Finder")
+        win.configure(bg=BG)
+        win.resizable(False, False)
+        win.grab_set()
+
+        # Centre on screen
+        win.update_idletasks()
+        w, h = 580, 420
+        x = (win.winfo_screenwidth()  - w) // 2
+        y = (win.winfo_screenheight() - h) // 2
+        win.geometry(f"{w}x{h}+{x}+{y}")
+
+        ACC = "#6c72ff"
+
+        tk.Label(win, text="⚡  Welcome to ComfyUI Workflow Finder",
+                 bg=BG, fg=ACC, font=("Consolas", 13, "bold")).pack(pady=(20, 4))
+        tk.Label(win, text="Let's get you set up in 3 steps.",
+                 bg=BG, fg=FG2, font=("Consolas", 10)).pack(pady=(0, 16))
+
+        steps = tk.Frame(win, bg=PNL, padx=20, pady=16)
+        steps.pack(fill="x", padx=24)
+
+        for num, title, body in [
+            ("1", "Add your workflow folders",
+             "Click  ＋ Add Location  and browse to the folder where\n"
+             "ComfyUI saves your workflows. It's usually here:\n\n"
+             "   [ComfyUI install]\\user\\default\\workflows\n\n"
+             "You can add as many locations as you have installs."),
+            ("2", "Scan them",
+             "Check the locations you want to include, then click\n"
+             "Scan Enabled. The app indexes every workflow JSON file\n"
+             "it finds so searches are instant."),
+            ("3", "Search",
+             "Type what you're looking for in plain English —\n"
+             "\"generate video from an image\" or \"face swap with LoRA\"\n"
+             "— and the app finds matching workflows by node type.\n"
+             "No need to remember filenames."),
+        ]:
+            row = tk.Frame(steps, bg=PNL); row.pack(fill="x", pady=(0, 12))
+            tk.Label(row, text=num, bg=ACC, fg="#0a0a1a",
+                     font=("Consolas", 11, "bold"),
+                     width=2, relief="flat").pack(side="left", anchor="n", padx=(0, 12))
+            col = tk.Frame(row, bg=PNL); col.pack(side="left", fill="x", expand=True)
+            tk.Label(col, text=title, bg=PNL, fg=FG,
+                     font=("Consolas", 10, "bold"), anchor="w").pack(fill="x")
+            tk.Label(col, text=body, bg=PNL, fg=FG2,
+                     font=("Consolas", 9), anchor="w", justify="left").pack(fill="x")
+
+        tk.Label(win,
+                 text="💡  AI search mode and Find in the Wild require a free\n"
+                      "    Anthropic API key — Fast mode works without one.",
+                 bg=BG, fg="#4a4a7a", font=("Consolas", 9), justify="left").pack(pady=(14, 0))
+
+        ttk.Button(win, text="Got it — let's go!",
+                   style="Accent.TButton",
+                   command=win.destroy).pack(pady=(14, 20))
+
+        win.bind("<Return>", lambda _: win.destroy())
+        win.focus_set()
 
     def _load_config(self) -> list:
         try:
@@ -1905,10 +1971,11 @@ class WildSearchWindow(tk.Toplevel):
                                relief="flat", wrap="word", state="disabled",
                                highlightthickness=0)
         self._detail.pack(fill="both", expand=True, padx=8, pady=(0,6))
-        paned.add(dp, minsize=80)
+        paned.add(dp, minsize=160)
 
-        # Set sash so tree gets ~70% and details gets ~30%
-        self.after(150, lambda: paned.sash_place(0, 0, int(self.winfo_height() * 0.68)))
+        # Set sash leaving 200px for details panel
+        self.after(200, lambda: paned.sash_place(
+            0, 0, max(300, paned.winfo_height() - 200)))
 
         # Status bar
         self._status = tk.StringVar(value="Enter a query and click Search Wild.")

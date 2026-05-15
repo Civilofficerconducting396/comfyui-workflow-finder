@@ -40,7 +40,37 @@ A desktop search and preview tool for your local ComfyUI workflow library — pl
 
 ---
 
-## Requirements
+## Getting Started
+
+When you first open the app you'll see a welcome dialog walking you through setup. The short version:
+
+**Step 1 — Add your workflow folders**
+
+Click **＋ Add Location** and browse to where ComfyUI saves your workflows. It's usually here:
+
+```
+[your ComfyUI install]\user\default\workflows
+```
+
+For example:
+```
+C:\ComfyUI\user\default\workflows
+C:\ComfyUI_windows_portable\ComfyUI\user\default\workflows
+```
+
+You can add as many locations as you have ComfyUI installs. Check the box next to each one to include it in scans.
+
+**Step 2 — Scan**
+
+Click **Scan Enabled**. The app indexes every workflow JSON it finds. With 1,000+ workflows this takes a few seconds.
+
+**Step 3 — Search**
+
+Type what you're looking for in plain English and hit Search. No need to remember filenames.
+
+---
+
+
 
 - Python 3.10+
 - `tkinter` — included with standard Python on Windows
