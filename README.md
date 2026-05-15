@@ -54,7 +54,8 @@ Click **＋ Add Location** and browse to where ComfyUI saves your workflows. It'
 
 For example:
 ```
-C:\ComfyUI\user\default\workflows
+C:\Comfy\ComfyUI\user\default\workflows
+H:\Comfy\ComfyUI\user\default\workflows
 C:\ComfyUI_windows_portable\ComfyUI\user\default\workflows
 ```
 
@@ -85,6 +86,33 @@ python -m pip install anthropic
 > & "$(python -c 'import sys; print(sys.executable)')" -m pip install anthropic
 > ```
 > That installs into whichever Python is actually running your scripts.
+
+---
+
+## Setting up your Anthropic API Key
+
+AI search mode and Find in the Wild both require a free Anthropic API account. Fast mode works without one.
+
+**Step 1 — Create an account**
+
+Go to [console.anthropic.com](https://console.anthropic.com) and sign up. You get free credits to try it out.
+
+**Step 2 — Get your API key**
+
+- Click **API Keys** in the left sidebar
+- Click **Create Key**, give it a name (e.g. "Workflow Finder")
+- Copy the key — it starts with `sk-ant-`
+
+**Step 3 — Add it to Windows Environment Variables**
+
+1. Press `Win + R`, type `sysdm.cpl`, hit Enter
+2. Click **Advanced** → **Environment Variables**
+3. Under **User variables**, click **New**
+4. Variable name: `ANTHROPIC_API_KEY`
+5. Variable value: paste your key
+6. Click OK all the way out and restart the app
+
+**Cost:** API usage is pay-per-use and very cheap for this tool — a typical wild search costs fractions of a cent. Set a monthly spending limit at [console.anthropic.com](https://console.anthropic.com) under **Billing** for peace of mind.
 
 ---
 
