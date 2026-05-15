@@ -29,7 +29,19 @@ A desktop search and preview tool for your local ComfyUI workflow library — pl
 - **Bezier wire colouring** — wires coloured by data type (IMAGE, LATENT, MODEL, VIDEO, MASK, etc.)
 - **Hover tooltips** — hover any node to see type, title, and slot counts
 
-### Find in the Wild 🌐
+### Node Pack Filter 🔌
+
+![Node Pack Filter](docs/screenshot_node_filter.png)
+
+Ever downloaded a workflow from the internet only to find it needs 10 custom node packages you don't have? The Node Pack Filter solves that.
+
+After scanning, the app reads your actual `custom_nodes` folder and detects which packages each workflow in your library requires. Click **🔌 Node Pack Filter** and you get a checklist of every custom node package found across your workflows — with a count of how many workflows use each one.
+
+- **Check only the packages you have installed** → search results only show workflows you can actually run right now
+- **Core nodes only** → see workflows that need zero custom packages, straight out of the box
+- Works with both Fast and AI search modes
+
+
 
 ![Find in the Wild](docs/screenshot_wild.png)
 
