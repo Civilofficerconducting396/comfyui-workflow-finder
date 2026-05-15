@@ -1,0 +1,157 @@
+{
+  "_comment": "ComfyUI Workflow Finder — suggested search phrases. Edit freely, add your own, reorganize categories. Reload the app to pick up changes.",
+  "categories": {
+
+    "Video Generation": [
+      "generate video from a text prompt",
+      "generate video from an image",
+      "image to video with motion",
+      "LTX video generation",
+      "Wan video generation",
+      "Hunyuan video generation",
+      "extend or continue a video clip",
+      "video generation with audio",
+      "text to video with camera movement",
+      "slow motion video generation",
+      "generate a short looping video"
+    ],
+
+    "Video Analysis": [
+      "load a video and generate a caption or description",
+      "extract frames from a video",
+      "analyze video content with a vision model",
+      "generate a prompt from a video frame",
+      "describe what is happening in a video",
+      "video to text transcription or description"
+    ],
+
+    "Image Generation": [
+      "text to image with Flux",
+      "text to image with SDXL",
+      "text to image with SD 1.5",
+      "high resolution image generation with upscale",
+      "generate image with a reference style",
+      "photorealistic portrait generation",
+      "fantasy or concept art generation",
+      "product photography on clean background",
+      "architectural or interior render"
+    ],
+
+    "Image Editing": [
+      "image to image transformation",
+      "inpainting to fill or replace an area",
+      "outpainting to expand image borders",
+      "background removal or replacement",
+      "object removal from image",
+      "image upscaling and enhancement",
+      "color correction or style transfer",
+      "remove watermark or artifact",
+      "sharpen or restore a blurry image"
+    ],
+
+    "ControlNet": [
+      "image generation with pose control",
+      "image generation with depth map control",
+      "image generation with canny edge control",
+      "image generation with lineart control",
+      "image generation with normal map",
+      "tile upscale with ControlNet",
+      "multi-controlnet combining pose and depth"
+    ],
+
+    "Face": [
+      "face swap",
+      "face identity consistency across images",
+      "portrait with face reference using PuLID",
+      "portrait with face reference using InstantID",
+      "face restoration and enhancement",
+      "multiple face swaps in one image",
+      "age progression or regression",
+      "facial expression editing"
+    ],
+
+    "Captioning and Vision LLM": [
+      "caption an image with Florence2",
+      "tag an image with WD14 tagger",
+      "describe image contents with a vision model",
+      "generate a prompt from an existing image",
+      "reverse prompt engineering from image",
+      "analyze image with QwenVL",
+      "batch caption multiple images",
+      "describe image style for prompt reuse",
+      "interrogate image with CLIP"
+    ],
+
+    "LoRA and Models": [
+      "use a single LoRA for style",
+      "stack multiple LoRAs together",
+      "character consistency using a LoRA",
+      "apply a concept LoRA",
+      "use a detail or texture LoRA",
+      "apply a face LoRA for likeness",
+      "combine checkpoint with multiple LoRAs"
+    ],
+
+    "IP-Adapter and Reference": [
+      "style transfer with IP-Adapter",
+      "use a reference image for style",
+      "face identity with IP-Adapter FaceID",
+      "combine IP-Adapter with ControlNet",
+      "apply style from reference image",
+      "character reference image consistency"
+    ],
+
+    "Segmentation and Masking": [
+      "segment and mask an object with SAM",
+      "detect and isolate object with GroundingDINO",
+      "remove background with RMBG",
+      "create mask from text description",
+      "video object tracking and masking",
+      "inpaint within a detected region"
+    ],
+
+    "Upscaling": [
+      "upscale image with ESRGAN",
+      "ultimate tile upscale for large images",
+      "upscale and enhance with detail",
+      "4x upscale with face restoration",
+      "video upscaling",
+      "LTX spatial upscale"
+    ],
+
+    "Batch and Automation": [
+      "batch process multiple images from a folder",
+      "batch generate with prompts from a text file",
+      "process image list with consistent settings",
+      "automated caption and save workflow",
+      "bulk image resizing or format conversion",
+      "iterate through LoRAs on same prompt"
+    ],
+
+    "Audio": [
+      "generate video with synchronized audio",
+      "load audio and combine with video",
+      "text to speech for video narration",
+      "add music or sound to generated video"
+    ],
+
+    "Qwen Image Edit": [
+      "edit an image using a text instruction",
+      "change object color with Qwen image edit",
+      "rotate or repose object in image",
+      "add or remove element from image",
+      "change background of product image",
+      "multiple angle views of same object"
+    ],
+
+    "Flux Specific": [
+      "Flux text to image",
+      "Flux with LoRA",
+      "Flux image to image",
+      "Flux inpainting",
+      "Flux with ControlNet",
+      "Flux fill outpainting"
+    ]
+
+  }
+}

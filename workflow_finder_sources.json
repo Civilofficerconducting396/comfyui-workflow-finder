@@ -1,0 +1,37 @@
+{
+  "_comment": "Wild Search sources. Edit freely, restart to reload.",
+  "sources": [
+    {
+      "name": "YouTube",
+      "enabled": true
+    },
+    {
+      "name": "CivitAI",
+      "enabled": true
+    },
+    {
+      "name": "GitHub",
+      "enabled": true
+    },
+    {
+      "name": "Reddit (r/comfyui)",
+      "enabled": true
+    },
+    {
+      "name": "ComfyHub",
+      "enabled": true
+    },
+    {
+      "name": "Hugging Face",
+      "enabled": false
+    },
+    {
+      "name": "ComfyUI Forums",
+      "enabled": false
+    },
+    {
+      "name": "OpenArt",
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "_comment": "Quick-filter buttons shown next to the Name Filter bar. Edit freely, restart app to reload.",
+  "prefixes": [
+    "Wow_",
+    "Wowie_",
+    "Master_",
+    "Test_",
+    "WIP_"
+  ]
+}
