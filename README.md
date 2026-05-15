@@ -1,8 +1,8 @@
 # ⚡ ComfyUI Workflow Finder
 
-A desktop search and preview tool for your local ComfyUI workflow library — plus a live web search to find workflows in the wild across YouTube, CivitAI, GitHub, and more.
+A desktop search and preview tool for your local ComfyUI workflow library — plus a live web search to find workflows across YouTube, CivitAI, GitHub, and more.
 
-![Workflow Finder](docs/screenshot.png)
+![Main Search](docs/screenshot_main.png)
 
 ---
 
@@ -13,13 +13,16 @@ A desktop search and preview tool for your local ComfyUI workflow library — pl
 - **AI-powered search** — optional Claude API mode for natural language queries that go beyond keyword matching
 - **Name filter** — partial match, case-insensitive, live-as-you-type with custom quick-pick dropdown
 - **Suggestions dropdown** — 80+ pre-built search phrases across 15 categories, loaded from an editable JSON file
-- **Sortable columns** — click any column header to sort ascending/descending with arrow indicator
+- **Sortable columns** — click any column header to sort ascending/descending
 - **Created / Modified dates** — find your most recently worked-on workflows instantly
-- **Multiple scan locations** — add as many workflow folders as you have, toggle each on/off with real checkboxes
+- **Multiple scan locations** — add as many workflow folders as you have, toggle each on/off
 - **Dynamic location toggling** — check or uncheck a location and results update automatically without a full rescan
-- **Config persistence** — scan locations, enabled states, and preferences survive restarts
+- **Config persistence** — scan locations and preferences survive restarts
 
 ### Graph Preview
+
+![Graph Preview](docs/screenshot_graph.png)
+
 - **Node graph preview** — see the actual node layout of any workflow, colour-coded by node type
 - **Fullscreen graph popup** — open any workflow graph maximized with a colour legend
 - **Zoomable / pannable canvas** — scroll to zoom, drag to pan, F to fit, right-click for menu
@@ -27,7 +30,10 @@ A desktop search and preview tool for your local ComfyUI workflow library — pl
 - **Hover tooltips** — hover any node to see type, title, and slot counts
 
 ### Find in the Wild 🌐
-- **Live web search** — Claude searches YouTube, CivitAI, GitHub, Reddit, ComfyHub in real time
+
+![Find in the Wild](docs/screenshot_wild.png)
+
+- **Live web search** — Claude searches YouTube, CivitAI, GitHub, Reddit, and ComfyHub in real time
 - **Download link detection** — automatically finds direct download links where available
 - **Live search indicator** — animated progress panel shows each web search query as Claude fires it
 - **Configurable sources** — edit `workflow_finder_sources.json` to add or remove sources
@@ -67,7 +73,7 @@ No installer, no virtual environment needed.
 | `workflow_finder_queries.json` | Suggested search phrases (auto-created, editable) |
 | `workflow_finder_prefixes.json` | Quick name-filter prefixes (auto-created, editable) |
 | `workflow_finder_sources.json` | Wild Search sources (auto-created, editable) |
-| `workflow_finder_config.json` | Your scan locations — auto-created, **not in repo** |
+| `workflow_finder_config.json` | Your scan locations — auto-created, **not committed to repo** |
 
 ---
 
@@ -87,7 +93,20 @@ Click **🌐 Find in Wild** in the toolbar. Claude browses real websites in real
 - Double-click any row to open in your browser
 - Right-click for copy options
 
-Edit `workflow_finder_sources.json` to customise which sites are searched.
+Edit `workflow_finder_sources.json` to customise which sites are searched:
+
+```json
+{
+  "sources": [
+    {"name": "YouTube",            "enabled": true},
+    {"name": "CivitAI",            "enabled": true},
+    {"name": "GitHub",             "enabled": true},
+    {"name": "Reddit (r/comfyui)", "enabled": true},
+    {"name": "ComfyHub",           "enabled": true},
+    {"name": "Hugging Face",       "enabled": false}
+  ]
+}
+```
 
 ---
 
@@ -100,20 +119,37 @@ Edit `workflow_finder_sources.json` to customise which sites are searched.
 | `F` key | Fit to screen |
 | Right-click | Context menu |
 | Hover | Node tooltip |
+| Double-click row | Open in Explorer |
+
+Node colours: teal=video I/O, navy=image I/O, purple=model loaders, orange=samplers, green=CLIP/text, gold=captioning/LLM, magenta=ControlNet, rust=SAM/segment.
 
 ---
 
 ## Customisation
 
-All JSON files are auto-created on first run. Edit freely, restart to reload.
+All JSON config files are auto-created on first run. Edit freely, restart to reload.
 
-Add your own search suggestions to `workflow_finder_queries.json`, name filter prefixes to `workflow_finder_prefixes.json`, and wild search sources to `workflow_finder_sources.json`.
+**Add search suggestions** — edit `workflow_finder_queries.json`:
+```json
+{
+  "categories": {
+    "My Category": ["my custom search phrase"]
+  }
+}
+```
+
+**Add name filter prefixes** — edit `workflow_finder_prefixes.json`:
+```json
+{
+  "prefixes": ["Wow_", "Master_", "Test_", "WIP_", "Flux_", "LTX_"]
+}
+```
 
 ---
 
 ## Related
 
-- [ComfyUI Model Scanner](https://github.com/gregowahoo/comfyui-model-scanner)
+- [ComfyUI Model Scanner](https://github.com/gregowahoo/comfyui-model-scanner) — scan your model library, check which models a workflow needs, copy between drives
 
 ---
 
