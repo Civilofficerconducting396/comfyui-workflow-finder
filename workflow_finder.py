@@ -322,6 +322,135 @@ def extract_workflow_fingerprint(json_path: str) -> Optional[dict]:
     }
 
 
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Custom node package detection
+# ─────────────────────────────────────────────────────────────────────────────
+
+def get_install_root(workflow_dir: str) -> Optional[str]:
+    """
+    Derive ComfyUI install root from a workflow folder path.
+    Standard path: [root]/user/default/workflows  →  [root]
+    """
+    p = Path(workflow_dir)
+    # Build list of parents that actually exist
+    parents_to_check = []
+    for i in range(min(3, len(p.parents))):
+        try:
+            parents_to_check.append(p.parents[i])
+        except IndexError:
+            break
+
+    for parent in parents_to_check:
+        try:
+            if (parent / "custom_nodes").is_dir() or (parent / "main.py").is_file():
+                return str(parent)
+        except Exception:
+            pass
+    return None
+
+
+def scan_custom_nodes(install_root: str) -> dict[str, str]:
+    """
+    Scan custom_nodes directory and return {node_class_name: package_folder_name}.
+    Reads NODE_CLASS_MAPPINGS from each package's Python files.
+    """
+    cn_dir = os.path.join(install_root, "custom_nodes")
+    if not os.path.isdir(cn_dir):
+        return {}
+
+    result: dict[str, str] = {}
+
+    try:
+        packages = [p for p in os.listdir(cn_dir)
+                    if os.path.isdir(os.path.join(cn_dir, p))
+                    and not p.startswith(".")]
+    except Exception:
+        return {}
+
+    for pkg in packages:
+        pkg_path = os.path.join(cn_dir, pkg)
+
+        # Collect python files to check (init first, then others, limit total)
+        py_files: list[str] = []
+        init = os.path.join(pkg_path, "__init__.py")
+        if os.path.isfile(init):
+            py_files.append(init)
+        try:
+            for fn in os.listdir(pkg_path):
+                if fn.endswith(".py") and fn != "__init__.py":
+                    py_files.append(os.path.join(pkg_path, fn))
+                if len(py_files) >= 8:
+                    break
+        except Exception:
+            pass
+
+        found_any = False
+        for py_file in py_files:
+            try:
+                with open(py_file, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+
+                # Match NODE_CLASS_MAPPINGS = { ... } or .update({ ... })
+                for m in re.finditer(
+                    r'NODE_CLASS_MAPPINGS\s*(?:=\s*\{|\.update\s*\(\s*\{)([^}]*)\}',
+                    content, re.DOTALL
+                ):
+                    keys = re.findall(r'["\']([A-Za-z][A-Za-z0-9_\- ]*)["\']',
+                                      m.group(1))
+                    for key in keys:
+                        if key not in result:
+                            result[key] = pkg
+                            found_any = True
+
+            except Exception:
+                continue
+            if found_any:
+                break   # found mappings in this file, skip remaining files
+
+    return result
+
+
+def build_class_pkg_map(yaml_entries: list[dict],
+                         dir_entries: list[dict]) -> dict[str, str]:
+    """
+    Build a unified {class_name: package} map from all enabled ComfyUI installs.
+    Derives install roots from both YAML paths and workflow folder paths.
+    """
+    result: dict[str, str] = {}
+    roots_checked: set[str] = set()
+
+    # From YAML file paths
+    for e in yaml_entries:
+        if not e.get("enabled"): continue
+        root = str(Path(e["path"]).parent)
+        if root not in roots_checked:
+            roots_checked.add(root)
+            result.update(scan_custom_nodes(root))
+
+    # From workflow directory paths
+    for e in dir_entries:
+        if not e.get("enabled"): continue
+        root = get_install_root(e["path"])
+        if root and root not in roots_checked:
+            roots_checked.add(root)
+            result.update(scan_custom_nodes(root))
+
+    return result
+
+
+def tag_required_packages(fp: dict, class_to_pkg: dict[str, str]) -> dict:
+    """Add required_packages set to a fingerprint dict."""
+    pkgs: set[str] = set()
+    for node_type in fp.get("nodes", []):
+        pkg = class_to_pkg.get(node_type)
+        if pkg:
+            pkgs.add(pkg)
+    fp["required_packages"] = pkgs
+    return fp
+
+
 def parse_graph_data(json_path: str) -> Optional[dict]:
     """Parse workflow into graph data. Returns error key if not renderable."""
     try:
@@ -443,7 +572,7 @@ def search_claude(fps: list, query: str) -> list:
     try:
         client = anthropic.Anthropic()
         msg = client.messages.create(
-            model="claude-sonnet-4-20250514", max_tokens=1500,
+            model="claude-sonnet-4-6", max_tokens=1500,
             messages=[{"role": "user", "content": prompt}])
         raw = re.sub(r"```[a-z]*", "", msg.content[0].text.strip()).strip("`").strip()
         matches = json.loads(raw)
@@ -737,6 +866,8 @@ class WorkflowFinder(tk.Tk):
         self._last_q          = ""   # last node-search query
         self._last_mode       = "local"
         self._pb              = None  # progress bar widget, set during _build_ui
+        self._class_to_pkg: dict[str, str] = {}   # node class → package folder name
+        self._pkg_filter:   set[str] = set()      # empty = no filter (show all)
 
         self._build_styles()
         self._build_ui()
@@ -940,6 +1071,11 @@ class WorkflowFinder(tk.Tk):
                            font=("Consolas",10)).pack(side="left", padx=(0,4))
         ttk.Button(qr, text="Search", style="Accent.TButton",
                    command=self._start_search).pack(side="left", padx=(8,0))
+
+        self._pkg_btn_var = tk.StringVar(value="🔌 Node Pack Filter")
+        self._pkg_btn = ttk.Button(qr, textvariable=self._pkg_btn_var,
+                                    command=self._open_pkg_filter)
+        self._pkg_btn.pack(side="left", padx=(8,0))
 
         # Row 2: name / filename filter (instant, no scan needed)
         nr = tk.Frame(qf, bg="#111122"); nr.pack(fill="x", pady=(6,0))
@@ -1368,6 +1504,8 @@ class WorkflowFinder(tk.Tk):
                                    "Check at least one location before scanning."); return
         self.fingerprints = []
         self._fp_by_dir   = {}   # clear stale entries from disabled locations
+        # Snapshot dir_entries for the background thread
+        self._dir_entries_snapshot = [dict(e) for e in self.dir_entries]
         self._scan_sv.set("Scanning…"); self._status.set("Scanning workflow locations…")
         threading.Thread(target=self._scan_worker, args=(enabled,), daemon=True).start()
 
@@ -1387,12 +1525,27 @@ class WorkflowFinder(tk.Tk):
                     if total % 25 == 0:
                         self.after(0, self._scan_sv.set, f"Scanning… {total} files")
             self._fp_by_dir[root_dir] = dir_fps
+
+        # Build class→package map from all enabled installs
+        self.after(0, self._status.set, "Detecting custom node packages…")
+        c2p = build_class_pkg_map([], self._dir_entries_snapshot)
+        self._class_to_pkg = c2p
+
+        # Tag every fingerprint with its required packages
+        for dir_fps in self._fp_by_dir.values():
+            for fp in dir_fps:
+                tag_required_packages(fp, c2p)
+
         self._rebuild_fingerprints()
         fps = self.fingerprints
+        pkg_count = len({p for fp in fps for p in fp.get("required_packages", set())})
         msg = f"✓ {len(fps):,} workflows  ({total:,} files)"
+        self.after(0, self._pkg_filter_btn_refresh)
         self.after(0, lambda: (
             self._scan_sv.set(msg),
-            self._status.set(f"Scan complete — {len(fps):,} workflows from {len(dirs)} location(s).")
+            self._status.set(
+                f"Scan complete — {len(fps):,} workflows, "
+                f"{pkg_count} custom node package(s) detected.")
         ))
 
     def _scan_one_dir(self, dir_path: str):
@@ -1458,8 +1611,11 @@ class WorkflowFinder(tk.Tk):
                              args=(self._last_q, self._last_mode),
                              daemon=True).start()
         else:
-            for i in self._tree.get_children():
-                self._tree.delete(i)
+            # No active search — don't wipe the tree, just update status
+            active = self._pkg_filter or getattr(self, "_core_only_filter", False)
+            if active:
+                self._status.set(
+                    "Node pack filter applied — run a search or use Name Filter to see filtered results.")
 
     # ── Search ───────────────────────────────────────────────────────────
 
@@ -1490,9 +1646,9 @@ class WorkflowFinder(tk.Tk):
             messagebox.showinfo("Not Scanned", "Please scan directories first.")
             return
 
-        # Match against filename (no node scoring needed)
-        matches = [fp for fp in self.fingerprints
-                   if pattern in fp["filename"].lower()]
+        # Apply package filter first, then match against filename
+        pool = self._apply_pkg_filter(self.fingerprints)
+        matches = [fp for fp in pool if pattern in fp["filename"].lower()]
         matches.sort(key=lambda fp: fp["filename"].lower())
 
         for i in self._tree.get_children():
@@ -1530,8 +1686,11 @@ class WorkflowFinder(tk.Tk):
         threading.Thread(target=self._search_worker, args=(q, mode), daemon=True).start()
 
     def _search_worker(self, q, mode):
-        res = search_claude(self.fingerprints, q) if mode=="claude" \
-              else search_local(self.fingerprints, q)
+        # Apply package filter BEFORE searching so both Fast and AI
+        # modes only consider workflows that pass the current filter
+        pool = self._apply_pkg_filter(self.fingerprints)
+        res = search_claude(pool, q) if mode == "claude" \
+              else search_local(pool, q)
         self.results = res
         self.after(0, self._populate, res, q, mode)
 
@@ -1556,7 +1715,8 @@ class WorkflowFinder(tk.Tk):
                 fp["path"],
             ))
         m = "AI" if mode=="claude" else "fast"
-        self._status.set(f"[{m}]  {len(res):,} result(s) for: \"{q}\"")
+        filt = f"  [pkg filter active]" if (self._pkg_filter or getattr(self,"_core_only_filter",False)) else ""
+        self._status.set(f"[{m}]  {len(res):,} result(s) for: \"{q}\"{filt}")
 
     # ── Selection ────────────────────────────────────────────────────────
 
@@ -1648,6 +1808,168 @@ class WorkflowFinder(tk.Tk):
         if fp:
             self.clipboard_clear(); self.clipboard_append(fp["path"])
             self._status.set(f"Copied: {fp['path']}")
+
+    # ── Node Pack Filter ─────────────────────────────────────────────────
+
+    def _pkg_filter_btn_refresh(self):
+        """Update the filter button label to show active state."""
+        if not hasattr(self, "_pkg_btn_var"): return
+        if self._pkg_filter:
+            self._pkg_btn_var.set(f"🔌 Filter: {len(self._pkg_filter)} pkg(s) ✓")
+        elif hasattr(self, "_core_only_filter") and self._core_only_filter:
+            self._pkg_btn_var.set("🔌 Filter: core only ✓")
+        else:
+            self._pkg_btn_var.set("🔌 Node Pack Filter")
+
+    def _open_pkg_filter(self):
+        """Open the node pack filter dialog."""
+        if not self.fingerprints:
+            messagebox.showinfo("No data", "Scan a location first.")
+            return
+
+        # Collect all packages found across all scanned workflows
+        all_pkgs = sorted({p for fp in self.fingerprints
+                           for p in fp.get("required_packages", set())})
+
+        if not all_pkgs and not self._class_to_pkg:
+            messagebox.showinfo(
+                "No custom nodes detected",
+                "No custom node packages were detected in your ComfyUI installs.\n\n"
+                "Make sure your scan locations are inside a ComfyUI folder that\n"
+                "has a 'custom_nodes' directory.")
+            return
+
+        dlg = tk.Toplevel(self)
+        dlg.title("Node Pack Filter")
+        dlg.configure(bg=BG)
+        dlg.resizable(False, False)
+        dlg.update_idletasks()
+        w, h = 440, min(80 + len(all_pkgs) * 28 + 180, 620)
+        x = (dlg.winfo_screenwidth()  - w) // 2
+        y = (dlg.winfo_screenheight() - h) // 2
+        dlg.geometry(f"{w}x{h}+{x}+{y}")
+
+        ACC = "#6c72ff"
+        tk.Label(dlg, text="🔌  NODE PACK FILTER", bg=BG, fg=ACC,
+                 font=("Consolas",11,"bold")).pack(pady=(14,4))
+        tk.Label(dlg,
+                 text="Show only workflows whose required packages\n"
+                      "are all ticked below.",
+                 bg=BG, fg=FG2, font=("Consolas",9)).pack()
+
+        # Core only toggle
+        core_var = tk.BooleanVar(value=getattr(self, "_core_only_filter", False))
+        tk.Checkbutton(dlg, text="Core nodes only  (no custom packages needed)",
+                       variable=core_var, bg=BG, fg=FG, selectcolor=BG,
+                       activebackground=BG, font=("Consolas",10)).pack(
+                       anchor="w", padx=16, pady=(10,4))
+
+        ttk.Separator(dlg).pack(fill="x", padx=16, pady=4)
+        tk.Label(dlg, text="Custom packages found in your workflows:",
+                 bg=BG, fg=FG2, font=("Consolas",9,"bold")).pack(anchor="w", padx=16)
+
+        # Scrollable package list — built FIRST so pkg_vars exists before buttons
+        canvas = tk.Canvas(dlg, bg=BG, highlightthickness=0)
+        sb = ttk.Scrollbar(dlg, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=sb.set)
+
+        frm = tk.Frame(canvas, bg=BG)
+        canvas.create_window((0,0), window=frm, anchor="nw")
+        frm.bind("<Configure>", lambda _: canvas.configure(
+            scrollregion=canvas.bbox("all")))
+
+        # Mouse wheel
+        def _wheel(event):
+            delta = -1 if (event.num == 4 or event.delta > 0) else 1
+            canvas.yview_scroll(delta, "units")
+        for w_ in (canvas, frm, dlg):
+            w_.bind("<MouseWheel>", _wheel)
+            w_.bind("<Button-4>", _wheel)
+            w_.bind("<Button-5>", _wheel)
+
+        # Build pkg_vars BEFORE button functions that reference them
+        pkg_vars = {}
+        for pkg in all_pkgs:
+            var = tk.BooleanVar(value=(pkg in self._pkg_filter
+                                       if self._pkg_filter else True))
+            pkg_vars[pkg] = var
+            count = sum(1 for fp in self.fingerprints
+                        if pkg in fp.get("required_packages", set()))
+            tk.Checkbutton(frm,
+                           text=f"{pkg}  ({count} workflow{'s' if count!=1 else ''})",
+                           variable=var, bg=BG, fg=FG, selectcolor=BG,
+                           activebackground=BG, font=("Consolas",9)
+                           ).pack(anchor="w", padx=4)
+
+        # Pack canvas and scrollbar after frm is populated
+        sb.pack(side="right", fill="y", padx=(0,4), pady=4)
+        canvas.pack(side="top", fill="both", expand=True, padx=(16,0), pady=4)
+
+        # Separator above buttons
+        ttk.Separator(dlg).pack(fill="x", padx=16, pady=(4,0))
+
+        # Button row at bottom — now pkg_vars is already defined
+        btn_row = tk.Frame(dlg, bg=BG)
+        btn_row.pack(fill="x", padx=16, pady=10)
+
+        def select_all():
+            core_var.set(False)
+            for v in pkg_vars.values():
+                v.set(True)
+
+        def clear_all():
+            core_var.set(False)
+            for v in pkg_vars.values():
+                v.set(False)
+
+        def apply():
+            try:
+                self._core_only_filter = core_var.get()
+                if self._core_only_filter:
+                    self._pkg_filter = set()
+                else:
+                    checked = {pkg for pkg, v in pkg_vars.items() if v.get()}
+                    self._pkg_filter = checked if checked != set(all_pkgs) else set()
+
+                passing = self._apply_pkg_filter(self.fingerprints)
+
+                self._pkg_filter_btn_refresh()
+                self._status.set(
+                    f"Filter active — {len(passing):,} of {len(self.fingerprints):,} "
+                    f"workflows match. Run a search to see them."
+                    if (self._pkg_filter or self._core_only_filter) else
+                    f"No filter — all {len(self.fingerprints):,} workflows visible.")
+                dlg.destroy()
+                self._rerun_last_search()
+            except Exception as e:
+                messagebox.showerror("Filter Error", str(e))
+
+        def clear_filter():
+            self._pkg_filter = set()
+            self._core_only_filter = False
+            self._pkg_filter_btn_refresh()
+            dlg.destroy()
+            self._status.set("Node pack filter cleared.")
+            self._rerun_last_search()
+
+        ttk.Button(btn_row, text="Select All",   command=select_all).pack(side="left", padx=(0,4))
+        ttk.Button(btn_row, text="Clear All",    command=clear_all).pack(side="left", padx=(0,4))
+        ttk.Button(btn_row, text="Clear Filter", command=clear_filter).pack(side="left", padx=(0,12))
+        ttk.Button(btn_row, text="Apply", style="Accent.TButton",
+                   command=apply).pack(side="right")
+
+        dlg.grab_set()
+        dlg.focus_set()
+
+    def _apply_pkg_filter(self, fps: list) -> list:
+        """Apply the active node pack filter to a list of fingerprints."""
+        core_only = getattr(self, "_core_only_filter", False)
+        if core_only:
+            return [fp for fp in fps if not fp.get("required_packages")]
+        if self._pkg_filter:
+            return [fp for fp in fps
+                    if fp.get("required_packages", set()).issubset(self._pkg_filter)]
+        return fps
 
     def _fit_graph(self):
         self._gc.fit()
@@ -2054,7 +2376,7 @@ Format: [{"source":"...","title":"...","url":"...","description":"...","download
             partial_input = ""
 
             with client.messages.stream(
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-6",
                 max_tokens=4000,
                 tools=[{"type": "web_search_20250305", "name": "web_search"}],
                 system=system_prompt,
